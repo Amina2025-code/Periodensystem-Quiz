@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/ico" sizes="16x16" href="favicon-prs.ico">
+  <link rel="icon" type="image/ico" sizes="32x32" href="favicon-prs.ico">
+  <link rel="icon" type="image/ico" sizes="96x96" href="favicon-prs.ico">
+  <title>Periodensystem Tabelle</title>
+  <style>
+    /********************************************
+     * GLOBAL-STYLES
+     ********************************************/
+     body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: rgb(108, 182, 205);
+    }
+    nav {
+        height: 90px;
+        width: 100%;
+        background-image: url(chemistry-7030100_1280.jpg);
+        display: flex;
+        justify-content: center;
+
+        box-shadow: 0px 2px 4px rgba(0,0,0,0.144);
+    }
+    nav button {
+        color: aliceblue;
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 1.3rem;
+        background: none;
+        border: none;
+        padding: 2rem;
+        cursor: pointer;
+    }
+    nav button:hover {
+      background-color: transparent;
+      border-radius: 5px;
+    }
+
+    /********************************************
+     * PERIODENSYSTEM-STYLES
+     ********************************************/
+    .ptable-container {
+      margin-bottom: 20px;
+    }
+    /* Haupt-Tabelle (Perioden 1-7, ohne Lanthaniden/Actiniden) */
+    #main-table-container {
+      display: grid;
+      grid-template-columns: repeat(18, 1fr);
+      grid-auto-rows: minmax(70px, auto);
+      gap: 3px;
+      background: rgb(108, 182, 205);
+      padding: 5px;
+      margin-bottom: 20px;
+    }
+    /* Lanthaniden/Actiniden-Tabelle */
+    .sub-table {
+      display: grid;
+      grid-template-columns: repeat(15, 1fr);
+      grid-auto-rows: minmax(70px, auto);
+      gap: 3px;
+      background: rgb(108, 182, 205);
+      padding: 5px;
+      margin-bottom: 20px;
+    }
+    /* Jedes Element-Feld */
+    .element {
+      background-image: url(sterne2.avif);
+      border: 0,5px solid #ddd;
+      border-radius: 5%;
+      text-align: center;
+      padding: 0px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+    .element:hover {
+      opacity: 0.9;
+    }
+    /* Detailbereich */
+    #element-details {
+      background: rgb(108, 182, 205);
+      padding: 10px;
+      margin-top: 20px;
+    }
+    #element-details h3 {
+      margin-top: 0;
+    }
+
+
+
+    /* Damit die Schrift bei dunklen Hintergründen lesbar bleibt */
+.element {
+  color: #fff;
+}
+/* Style für das Modal */
+.modal {
+  display: none; /* Modal ist zunächst unsichtbar */
+  position: fixed; /* Fixiert das Modal in der Mitte */
+  z-index: 1;
+  padding-top: 60px;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgb(0,0,0);
+  background-color: rgba(0,0,0,0.4); /* Halbdurchsichtiges schwarzes Hintergrund */
+}
+
+/* Modal-Inhalt */
+.modal-content {
+  background-color: aliceblue;
+  margin: 5% auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%; /* Kann angepasst werden */
+}
+
+/* Schließen Button */
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/* Bild im Modal */
+.modal-image {
+  width: 100px; /* Beispiel für eine Bildgröße */
+  height: 100px;
+  object-fit: contain;
+  margin-bottom: 10px;
+}
+
+.gruppe {
+  margin-left: 10px;
+}
+  </style>
+</head>
+<body>
+  
+    <nav>
+      <form action="http://127.0.0.1:5500/system.html">
+        <button id="nav-periodensystem">Periodensystem</button>
+      </form>
+
+      <form action="http://127.0.0.1:5500/videos.html">
+        <button id="nav-videos">Videos</button>
+      </form>
+
+      <form action="http://127.0.0.1:5500/quiz.html">
+      <button id="nav-quiz">Quiz</button>
+      </form>
+    </nav>
+
+<!-- Modal für Elementdetails -->
+<div id="element-modal" class="modal">
+  <div class="modal-content">
+    <span id="close-modal" class="close">&times;</span>
+    <h3 id="modal-title"></h3>
+    <img id="modal-image" class="modal-image" src="" alt="Element Bild">
+    <p id="modal-atomic-number"></p>
+    <p id="modal-atomic-mass"></p>
+    <p id="modal-period"></p>
+    <p id="modal-group"></p>
+    <p id="modal-info"></p>
+  </div>
+</div>
+
+
+
+  <main>
+    <!-- PERIODENSYSTEM -->
+    <section id="periodensystem" class="active">
+      <div class="ptable-container">
+              <!-- Detailbereich für ein angeklicktes Element -->
+      <div id="element-details">
+        <p></p>
+      </div>
+        <!-- Haupt-Tabelle (Perioden 1-7, ohne Lanthaniden/Actiniden) -->
+        <div id="main-table-container"></div>
+
+        <!-- Lanthaniden -->
+        <h3 class="gruppe">Lanthanide</h3>
+        <div id="lanthanides-container" class="sub-table"></div>
+
+        <!-- Actiniden -->
+        <h3 class="gruppe">Actinide</h3>
+        <div id="actinides-container" class="sub-table"></div>
+      </div>
+    </section>
+
+
+  </main>
+
+  <script>
+    /*******************************************************
+     * DATEN
+     *  - Haupt-Tabelle (elements)
+     *  - Lanthaniden (lanthanides)
+     *  - Actiniden (actinides)
+     *  
+     *  Jedes Element hat nun zusätzlich:
+     *    info: "Kurzer Infotext"
+     *******************************************************/
+    const elements = [
+      // Periode 1
+      {
+        atomicNumber: 1, symbol: "H", name: "Wasserstoff", atomicMass: 1.008,
+        period: 1, group: 1,
+        info: "Wasserstoff ist das häufigste Element im Universum und sehr leicht."
+      },
+      {
+        atomicNumber: 2, symbol: "He", name: "Helium", atomicMass: 4.0026,
+        period: 1, group: 18,
+        info: "Helium ist ein Edelgas und wird u. a. für Ballons verwendet."
+      },
+      // Periode 2
+      {
+        atomicNumber: 3, symbol: "Li", name: "Lithium", atomicMass: 6.94,
+        period: 2, group: 1,
+        info: "Lithium ist ein Alkalimetall und wird in Batterien eingesetzt."
+      },
+      {
+        atomicNumber: 4, symbol: "Be", name: "Beryllium", atomicMass: 9.0122,
+        period: 2, group: 2,
+        info: "Beryllium ist ein hartes, leichtes Erdalkalimetall."
+      },
+      {
+        atomicNumber: 5, symbol: "B", name: "Bor", atomicMass: 10.81,
+        period: 2, group: 13,
+        info: "Bor ist ein Halbmetall und kommt in Borosilikatglas vor."
+      },
+      {
+        atomicNumber: 6, symbol: "C", name: "Kohlenstoff", atomicMass: 12.011,
+        period: 2, group: 14,
+        info: "Kohlenstoff ist Grundlage allen Lebens (z. B. in Proteinen, DNA)."
+      },
+      {
+        atomicNumber: 7, symbol: "N", name: "Stickstoff", atomicMass: 14.007,
+        period: 2, group: 15,
+        info: "Stickstoff macht rund 78 % der Erdatmosphäre aus."
+      },
+      {
+        atomicNumber: 8, symbol: "O", name: "Sauerstoff", atomicMass: 15.999,
+        period: 2, group: 16,
+        info: "Sauerstoff ist lebenswichtig und macht etwa 21 % der Luft aus."
+      },
+      {
+        atomicNumber: 9, symbol: "F", name: "Fluor", atomicMass: 18.998,
+        period: 2, group: 17,
+        info: "Fluor ist das reaktivste Nichtmetall und ein starkes Halogen."
+      },
+      {
+        atomicNumber: 10, symbol: "Ne", name: "Neon", atomicMass: 20.180,
+        period: 2, group: 18,
+        info: "Neon ist ein Edelgas, bekannt aus leuchtenden Neonröhren."
+      },
+      // Periode 3
+      {
+        atomicNumber: 11, symbol: "Na", name: "Natrium", atomicMass: 22.990,
+        period: 3, group: 1,
+        info: "Natrium ist ein reaktionsfreudiges Alkalimetall, reagiert mit Wasser."
+      },
+      {
+        atomicNumber: 12, symbol: "Mg", name: "Magnesium", atomicMass: 24.305,
+        period: 3, group: 2,
+        info: "Magnesium brennt mit gleißend weißer Flamme und ist ein Leichtmetall."
+      },
+      {
+        atomicNumber: 13, symbol: "Al", name: "Aluminium", atomicMass: 26.982,
+        period: 3, group: 13,
+        info: "Aluminium ist ein leichtes Metall mit vielfältiger Verwendung."
+      },
+      {
+        atomicNumber: 14, symbol: "Si", name: "Silicium", atomicMass: 28.085,
+        period: 3, group: 14,
+        info: "Silicium ist ein wichtiger Halbleiter in der Elektronik."
+      },
+      {
+        atomicNumber: 15, symbol: "P", name: "Phosphor", atomicMass: 30.974,
+        period: 3, group: 15,
+        info: "Phosphor existiert in mehreren Modifikationen, z. B. weißer Phosphor."
+      },
+      {
+        atomicNumber: 16, symbol: "S", name: "Schwefel", atomicMass: 32.06,
+        period: 3, group: 16,
+        info: "Schwefel ist ein gelbes Nichtmetall und wichtig in der Chemieindustrie."
+      },
+      {
+        atomicNumber: 17, symbol: "Cl", name: "Chlor", atomicMass: 35.45,
+        period: 3, group: 17,
+        info: "Chlor ist ein gelbgrünes, giftiges Gas und starkes Oxidationsmittel."
+      },
+      {
+        atomicNumber: 18, symbol: "Ar", name: "Argon", atomicMass: 39.948,
+        period: 3, group: 18,
+        info: "Argon ist ein Edelgas und wird z. B. als Schutzgas beim Schweißen benutzt."
+      },
+      // Periode 4
+      {
+        atomicNumber: 19, symbol: "K", name: "Kalium", atomicMass: 39.098,
+        period: 4, group: 1,
+        info: "Kalium ist ein weiches Alkalimetall, wichtig in biologischen Prozessen."
+      },
+      {
+        atomicNumber: 20, symbol: "Ca", name: "Calcium", atomicMass: 40.078,
+        period: 4, group: 2,
+        info: "Calcium ist ein Erdalkalimetall, wichtig für Knochen und Zähne."
+      },
+      {
+        atomicNumber: 21, symbol: "Sc", name: "Scandium", atomicMass: 44.956,
+        period: 4, group: 3,
+        info: "Scandium ist ein seltenes Leichtmetall, verwendet in speziellen Legierungen."
+      },
+      {
+        atomicNumber: 22, symbol: "Ti", name: "Titan", atomicMass: 47.867,
+        period: 4, group: 4,
+        info: "Titan ist sehr fest und korrosionsbeständig, u. a. in Implantaten."
+      },
+      {
+        atomicNumber: 23, symbol: "V", name: "Vanadium", atomicMass: 50.942,
+        period: 4, group: 5,
+        info: "Vanadium wird oft in Stahllegierungen verwendet."
+      },
+      {
+        atomicNumber: 24, symbol: "Cr", name: "Chrom", atomicMass: 51.996,
+        period: 4, group: 6,
+        info: "Chrom bildet glänzende Oberflächen und wird zum Verchromen benutzt."
+      },
+      {
+        atomicNumber: 25, symbol: "Mn", name: "Mangan", atomicMass: 54.938,
+        period: 4, group: 7,
+        info: "Mangan ist essenziell für Stahlherstellung und Enzyme."
+      },
+      {
+        atomicNumber: 26, symbol: "Fe", name: "Eisen", atomicMass: 55.845,
+        period: 4, group: 8,
+        info: "Eisen ist das häufigste Schwermetall, zentral in Stahllegierungen."
+      },
+      {
+        atomicNumber: 27, symbol: "Co", name: "Cobalt", atomicMass: 58.933,
+        period: 4, group: 9,
+        info: "Cobalt wird in Lithium-Ionen-Akkus und Superlegierungen verwendet."
+      },
+      {
+        atomicNumber: 28, symbol: "Ni", name: "Nickel", atomicMass: 58.693,
+        period: 4, group: 10,
+        info: "Nickel ist korrosionsbeständig und oft in Münzen und Legierungen."
+      },
+      {
+        atomicNumber: 29, symbol: "Cu", name: "Kupfer", atomicMass: 63.546,
+        period: 4, group: 11,
+        info: "Kupfer ist ein hervorragender Leiter für Strom und Wärme."
+      },
+      {
+        atomicNumber: 30, symbol: "Zn", name: "Zink", atomicMass: 65.38,
+        period: 4, group: 12,
+        info: "Zink wird zum Verzinken von Stahl und in Legierungen verwendet."
+      },
+      {
+        atomicNumber: 31, symbol: "Ga", name: "Gallium", atomicMass: 69.723,
+        period: 4, group: 13,
+        info: "Gallium schmilzt knapp über Raumtemperatur und wird in Halbleitern benutzt."
+      },
+      {
+        atomicNumber: 32, symbol: "Ge", name: "Germanium", atomicMass: 72.630,
+        period: 4, group: 14,
+        info: "Germanium ist ein Halbmetall, früher in Transistoren verwendet."
+      },
+      {
+        atomicNumber: 33, symbol: "As", name: "Arsen", atomicMass: 74.922,
+        period: 4, group: 15,
+        info: "Arsen ist giftig, wird aber in Halbleitern und Legierungen genutzt."
+      },
+      {
+        atomicNumber: 34, symbol: "Se", name: "Selen", atomicMass: 78.971,
+        period: 4, group: 16,
+        info: "Selen ist essenziell in Spuren, kann aber auch giftig wirken."
+      },
+      {
+        atomicNumber: 35, symbol: "Br", name: "Brom", atomicMass: 79.904,
+        period: 4, group: 17,
+        info: "Brom ist ein rotbraunes, flüssiges Halogen bei Raumtemperatur."
+      },
+      {
+        atomicNumber: 36, symbol: "Kr", name: "Krypton", atomicMass: 83.798,
+        period: 4, group: 18,
+        info: "Krypton ist ein Edelgas, verwendet in Speziallampen."
+      },
+      // Periode 5
+      {
+        atomicNumber: 37, symbol: "Rb", name: "Rubidium", atomicMass: 85.468,
+        period: 5, group: 1,
+        info: "Rubidium ist ein sehr reaktives Alkalimetall, entzündet sich an Luft."
+      },
+      {
+        atomicNumber: 38, symbol: "Sr", name: "Strontium", atomicMass: 87.62,
+        period: 5, group: 2,
+        info: "Strontiumsalze färben Flammen rot und finden Verwendung in Pyrotechnik."
+      },
+      {
+        atomicNumber: 39, symbol: "Y", name: "Yttrium", atomicMass: 88.906,
+        period: 5, group: 3,
+        info: "Yttrium wird in Leuchtstoffen und Hochtemperatur-Supraleitern eingesetzt."
+      },
+      {
+        atomicNumber: 40, symbol: "Zr", name: "Zirkonium", atomicMass: 91.224,
+        period: 5, group: 4,
+        info: "Zirkonium wird in Reaktortechnik genutzt, da es kaum Neutronen absorbiert."
+      },
+      {
+        atomicNumber: 41, symbol: "Nb", name: "Niob", atomicMass: 92.906,
+        period: 5, group: 5,
+        info: "Niob erhöht in Legierungen die Festigkeit und Korrosionsbeständigkeit."
+      },
+      {
+        atomicNumber: 42, symbol: "Mo", name: "Molybdän", atomicMass: 95.95,
+        period: 5, group: 6,
+        info: "Molybdän wird in hitzebeständigen Legierungen und Katalysatoren eingesetzt."
+      },
+      {
+        atomicNumber: 43, symbol: "Tc", name: "Technetium", atomicMass: 98,
+        period: 5, group: 7,
+        info: "Technetium ist das leichteste künstliche Element und radioaktiv."
+      },
+      {
+        atomicNumber: 44, symbol: "Ru", name: "Ruthenium", atomicMass: 101.07,
+        period: 5, group: 8,
+        info: "Ruthenium wird als Katalysator und in Elektronikbauteilen eingesetzt."
+      },
+      {
+        atomicNumber: 45, symbol: "Rh", name: "Rhodium", atomicMass: 102.91,
+        period: 5, group: 9,
+        info: "Rhodium ist ein seltenes Edelmetall, u. a. in Katalysatoren."
+      },
+      {
+        atomicNumber: 46, symbol: "Pd", name: "Palladium", atomicMass: 106.42,
+        period: 5, group: 10,
+        info: "Palladium ist ein Edelmetall, wird für Katalysatoren und Schmuck verwendet."
+      },
+      {
+        atomicNumber: 47, symbol: "Ag", name: "Silber", atomicMass: 107.87,
+        period: 5, group: 11,
+        info: "Silber hat die höchste elektrische Leitfähigkeit aller Metalle."
+      },
+      {
+        atomicNumber: 48, symbol: "Cd", name: "Cadmium", atomicMass: 112.41,
+        period: 5, group: 12,
+        info: "Cadmium ist giftig, wurde früher in Akkus und als Pigment genutzt."
+      },
+      {
+        atomicNumber: 49, symbol: "In", name: "Indium", atomicMass: 114.82,
+        period: 5, group: 13,
+        info: "Indium wird in LCD-Bildschirmen (Indiumzinnoxid) verwendet."
+      },
+      {
+        atomicNumber: 50, symbol: "Sn", name: "Zinn", atomicMass: 118.71,
+        period: 5, group: 14,
+        info: "Zinn wird in Lötlegierungen und zur Verzinnung von Stahl verwendet."
+      },
+      {
+        atomicNumber: 51, symbol: "Sb", name: "Antimon", atomicMass: 121.76,
+        period: 5, group: 15,
+        info: "Antimon ist ein Halbmetall, verwendet in Legierungen und Halbleitern."
+      },
+      {
+        atomicNumber: 52, symbol: "Te", name: "Tellur", atomicMass: 127.60,
+        period: 5, group: 16,
+        info: "Tellur ist selten und wird z. B. in Solarzellen (CdTe) verwendet."
+      },
+      {
+        atomicNumber: 53, symbol: "I", name: "Iod", atomicMass: 126.90,
+        period: 5, group: 17,
+        info: "Iod ist ein Halogen und wichtig für die Schilddrüsenfunktion."
+      },
+      {
+        atomicNumber: 54, symbol: "Xe", name: "Xenon", atomicMass: 131.29,
+        period: 5, group: 18,
+        info: "Xenon ist ein Edelgas, u. a. in Blitzlichtern und Scheinwerfern genutzt."
+      },
+      // Periode 6 (ohne Lanthaniden 57-71)
+      {
+        atomicNumber: 55, symbol: "Cs", name: "Caesium", atomicMass: 132.91,
+        period: 6, group: 1,
+        info: "Caesium ist extrem reaktiv und schmilzt bereits bei 28 °C."
+      },
+      {
+        atomicNumber: 56, symbol: "Ba", name: "Barium", atomicMass: 137.33,
+        period: 6, group: 2,
+        info: "Bariumverbindungen werden z. B. in Feuerwerkskörpern (grüne Flamme) verwendet."
+      },
+      {
+        atomicNumber: 72, symbol: "Hf", name: "Hafnium", atomicMass: 178.49,
+        period: 6, group: 4,
+        info: "Hafnium ähnelt Zirkonium und wird in Legierungen und Halbleitern genutzt."
+      },
+      {
+        atomicNumber: 73, symbol: "Ta", name: "Tantal", atomicMass: 180.95,
+        period: 6, group: 5,
+        info: "Tantal wird in Elektrolytkondensatoren und Speziallegierungen eingesetzt."
+      },
+      {
+        atomicNumber: 74, symbol: "W", name: "Wolfram", atomicMass: 183.84,
+        period: 6, group: 6,
+        info: "Wolfram hat den höchsten Schmelzpunkt aller Metalle (3422 °C)."
+      },
+      {
+        atomicNumber: 75, symbol: "Re", name: "Rhenium", atomicMass: 186.21,
+        period: 6, group: 7,
+        info: "Rhenium wird für hochfeste Legierungen, z. B. in Triebwerken, genutzt."
+      },
+      {
+        atomicNumber: 76, symbol: "Os", name: "Osmium", atomicMass: 190.23,
+        period: 6, group: 8,
+        info: "Osmium ist das dichteste bekannte Element (22,59 g/cm³)."
+      },
+      {
+        atomicNumber: 77, symbol: "Ir", name: "Iridium", atomicMass: 192.22,
+        period: 6, group: 9,
+        info: "Iridium ist extrem korrosionsbeständig und sehr selten."
+      },
+      {
+        atomicNumber: 78, symbol: "Pt", name: "Platin", atomicMass: 195.08,
+        period: 6, group: 10,
+        info: "Platin ist ein Edelmetall, genutzt in Katalysatoren und Schmuck."
+      },
+      {
+        atomicNumber: 79, symbol: "Au", name: "Gold", atomicMass: 196.97,
+        period: 6, group: 11,
+        info: "Gold ist ein begehrtes Edelmetall, korrosionsbeständig und leitfähig."
+      },
+      {
+        atomicNumber: 80, symbol: "Hg", name: "Quecksilber", atomicMass: 200.59,
+        period: 6, group: 12,
+        info: "Quecksilber ist das einzige bei Raumtemperatur flüssige Metall."
+      },
+      {
+        atomicNumber: 81, symbol: "Tl", name: "Thallium", atomicMass: 204.38,
+        period: 6, group: 13,
+        info: "Thallium ist hochgiftig, wurde früher als Rattengift verwendet."
+      },
+      {
+        atomicNumber: 82, symbol: "Pb", name: "Blei", atomicMass: 207.2,
+        period: 6, group: 14,
+        info: "Blei ist ein Schwermetall, giftig, aber gut formbar (z. B. in Bleigewichten)."
+      },
+      {
+        atomicNumber: 83, symbol: "Bi", name: "Bismut", atomicMass: 208.98,
+        period: 6, group: 15,
+        info: "Bismut ist schwach radioaktiv, hat schöne bunte Kristalle beim Abkühlen."
+      },
+      {
+        atomicNumber: 84, symbol: "Po", name: "Polonium", atomicMass: 209,
+        period: 6, group: 16,
+        info: "Polonium ist hochradioaktiv und wurde von Marie Curie entdeckt."
+      },
+      {
+        atomicNumber: 85, symbol: "At", name: "Astat", atomicMass: 210,
+        period: 6, group: 17,
+        info: "Astat ist das seltenste Halogen, alle Isotope sind radioaktiv."
+      },
+      {
+        atomicNumber: 86, symbol: "Rn", name: "Radon", atomicMass: 222,
+        period: 6, group: 18,
+        info: "Radon ist ein radioaktives Edelgas, kann sich in Gebäuden ansammeln."
+      },
+      // Periode 7 (ohne Actiniden 89-103)
+      {
+        atomicNumber: 87, symbol: "Fr", name: "Francium", atomicMass: 223,
+        period: 7, group: 1,
+        info: "Francium ist extrem selten und stark radioaktiv."
+      },
+      {
+        atomicNumber: 88, symbol: "Ra", name: "Radium", atomicMass: 226,
+        period: 7, group: 2,
+        info: "Radium ist radioaktiv, früher in Leuchtfarben verwendet."
+      },
+      {
+        atomicNumber: 104, symbol: "Rf", name: "Rutherfordium", atomicMass: 267,
+        period: 7, group: 4,
+        info: "Rutherfordium ist ein künstliches, radioaktives Element."
+      },
+      {
+        atomicNumber: 105, symbol: "Db", name: "Dubnium", atomicMass: 268,
+        period: 7, group: 5,
+        info: "Dubnium ist ein künstliches Element, benannt nach Dubna in Russland."
+      },
+      {
+        atomicNumber: 106, symbol: "Sg", name: "Seaborgium", atomicMass: 271,
+        period: 7, group: 6,
+        info: "Seaborgium ist ein künstliches Element, benannt nach Glenn T. Seaborg."
+      },
+      {
+        atomicNumber: 107, symbol: "Bh", name: "Bohrium", atomicMass: 270,
+        period: 7, group: 7,
+        info: "Bohrium ist ein künstliches Element, benannt nach Niels Bohr."
+      },
+      {
+        atomicNumber: 108, symbol: "Hs", name: "Hassium", atomicMass: 277,
+        period: 7, group: 8,
+        info: "Hassium ist ein künstliches Element, entdeckt in Darmstadt (Deutschland)."
+      },
+      {
+        atomicNumber: 109, symbol: "Mt", name: "Meitnerium", atomicMass: 278,
+        period: 7, group: 9,
+        info: "Meitnerium ist ein künstliches Element, benannt nach Lise Meitner."
+      },
+      {
+        atomicNumber: 110, symbol: "Ds", name: "Darmstadtium", atomicMass: 281,
+        period: 7, group: 10,
+        info: "Darmstadtium ist ein künstliches Element, erstmals in Darmstadt erzeugt."
+      },
+      {
+        atomicNumber: 111, symbol: "Rg", name: "Roentgenium", atomicMass: 282,
+        period: 7, group: 11,
+        info: "Roentgenium ist ein künstliches Element, benannt nach Wilhelm Röntgen."
+      },
+      {
+        atomicNumber: 112, symbol: "Cn", name: "Copernicium", atomicMass: 285,
+        period: 7, group: 12,
+        info: "Copernicium ist ein künstliches Element, benannt nach Nikolaus Kopernikus."
+      },
+      {
+        atomicNumber: 113, symbol: "Nh", name: "Nihonium", atomicMass: 286,
+        period: 7, group: 13,
+        info: "Nihonium ist ein künstliches Element, benannt nach 'Nihon' (Japan)."
+      },
+      {
+        atomicNumber: 114, symbol: "Fl", name: "Flerovium", atomicMass: 289,
+        period: 7, group: 14,
+        info: "Flerovium ist ein künstliches Element, benannt nach dem Flerov-Labor."
+      },
+      {
+        atomicNumber: 115, symbol: "Mc", name: "Moscovium", atomicMass: 290,
+        period: 7, group: 15,
+        info: "Moscovium ist ein künstliches Element, benannt nach der Region Moskau."
+      },
+      {
+        atomicNumber: 116, symbol: "Lv", name: "Livermorium", atomicMass: 293,
+        period: 7, group: 16,
+        info: "Livermorium ist ein künstliches Element, benannt nach dem Lawrence Livermore Lab."
+      },
+      {
+        atomicNumber: 117, symbol: "Ts", name: "Tenness", atomicMass: 294,
+        period: 7, group: 17,
+        info: "Tennessine ist ein künstliches Halogen, benannt nach dem US-Bundesstaat Tennessee."
+      },
+      {
+        atomicNumber: 118, symbol: "Og", name: "Oganesson", atomicMass: 294,
+        period: 7, group: 18,
+        info: "Oganesson ist ein künstliches Edelgas und das Element mit der höchsten Ordnungszahl."
+      }
+    ];
+
+    // Lanthaniden (Periode 6, Atomzahlen 57-71, eigentlich Gruppe 3)
+    const lanthanides = [
+      {
+        atomicNumber: 57, symbol: "La", name: "Lanthan", atomicMass: 138.91, group: 3,
+        info: "Lanthan ist das erste Element der Lanthanoiden-Reihe."
+      },
+      {
+        atomicNumber: 58, symbol: "Ce", name: "Cer", atomicMass: 140.12, group: 3,
+        info: "Cer wird in Zündsteinen für Feuerzeuge (Mischmetall) verwendet."
+      },
+      {
+        atomicNumber: 59, symbol: "Pr", name: "Praseodym", atomicMass: 140.91, group: 3,
+        info: "Praseodym gibt Glas und Keramik eine grüne Färbung."
+      },
+      {
+        atomicNumber: 60, symbol: "Nd", name: "Neodym", atomicMass: 144.24, group: 3,
+        info: "Neodym wird für starke Permanentmagnete (NdFeB) genutzt."
+      },
+      {
+        atomicNumber: 61, symbol: "Pm", name: "Promethium", atomicMass: 145, group: 3,
+        info: "Promethium ist radioaktiv und sehr selten auf der Erde."
+      },
+      {
+        atomicNumber: 62, symbol: "Sm", name: "Samarium", atomicMass: 150.36, group: 3,
+        info: "Samarium wird ebenfalls in Permanentmagneten eingesetzt."
+      },
+      {
+        atomicNumber: 63, symbol: "Eu", name: "Europium", atomicMass: 151.96, group: 3,
+        info: "Europium wird in Leuchtstoffen (rote Farbtöne) für Bildschirme verwendet."
+      },
+      {
+        atomicNumber: 64, symbol: "Gd", name: "Gadolinium", atomicMass: 157.25, group: 3,
+        info: "Gadolinium hat magnetische Eigenschaften und wird in MRT-Kontrastmitteln benutzt."
+      },
+      {
+        atomicNumber: 65, symbol: "Tb", name: "Terbium", atomicMass: 158.93, group: 3,
+        info: "Terbium wird in grünen Leuchtstoffen (Bildschirme, LEDs) verwendet."
+      },
+      {
+        atomicNumber: 66, symbol: "Dy", name: "Dysprosium", atomicMass: 162.50, group: 3,
+        info: "Dysprosium steigert die Koerzitivfeldstärke in Magnetlegierungen."
+      },
+      {
+        atomicNumber: 67, symbol: "Ho", name: "Holmium", atomicMass: 164.93, group: 3,
+        info: "Holmium hat das höchste magnetische Moment aller Elemente."
+      },
+      {
+        atomicNumber: 68, symbol: "Er", name: "Erbium", atomicMass: 167.26, group: 3,
+        info: "Erbium wird für rosafarbene Gläser und als Dotierung in Glasfasern eingesetzt."
+      },
+      {
+        atomicNumber: 69, symbol: "Tm", name: "Thulium", atomicMass: 168.93, group: 3,
+        info: "Thulium ist sehr selten und teuer, hat aber Anwendungen in Lasergeräten."
+      },
+      {
+        atomicNumber: 70, symbol: "Yb", name: "Ytterbium", atomicMass: 173.04, group: 3,
+        info: "Ytterbium kommt in Laserlegierungen und als Dotiermittel vor."
+      },
+      {
+        atomicNumber: 71, symbol: "Lu", name: "Lutetium", atomicMass: 174.97, group: 3,
+        info: "Lutetium ist eines der teuersten Metalle, findet Verwendung in PET-Scannern."
+      }
+    ];
+
+    // Actiniden (Periode 7, Atomzahlen 89-103, eigentlich Gruppe 3)
+    const actinides = [
+      {
+        atomicNumber: 89, symbol: "Ac", name: "Actinium", atomicMass: 227, group: 3,
+        info: "Actinium ist stark radioaktiv und Namensgeber der Actinoide."
+      },
+      {
+        atomicNumber: 90, symbol: "Th", name: "Thorium", atomicMass: 232.04, group: 3,
+        info: "Thorium wird als potenzieller Brennstoff in Thorium-Reaktoren diskutiert."
+      },
+      {
+        atomicNumber: 91, symbol: "Pa", name: "Protactinium", atomicMass: 231.04, group: 3,
+        info: "Protactinium ist ein seltenes, radioaktives Zwischenprodukt beim Uranzerfall."
+      },
+      {
+        atomicNumber: 92, symbol: "U", name: "Uran", atomicMass: 238.03, group: 3,
+        info: "Uran wird als Kernbrennstoff in Atomkraftwerken genutzt."
+      },
+      {
+        atomicNumber: 93, symbol: "Np", name: "Neptunium", atomicMass: 237, group: 3,
+        info: "Neptunium entsteht in Kernreaktoren als Abfallprodukt."
+      },
+      {
+        atomicNumber: 94, symbol: "Pu", name: "Plutonium", atomicMass: 244, group: 3,
+        info: "Plutonium wird in Atomwaffen und teilweise in MOX-Brennelementen genutzt."
+      },
+      {
+        atomicNumber: 95, symbol: "Am", name: "Americium", atomicMass: 243, group: 3,
+        info: "Americium wird in kommerziellen Rauchmeldern als Strahlenquelle verwendet."
+      },
+      {
+        atomicNumber: 96, symbol: "Cm", name: "Curium", atomicMass: 247, group: 3,
+        info: "Curium wurde von Glenn T. Seaborg und Kollegen entdeckt."
+      },
+      {
+        atomicNumber: 97, symbol: "Bk", name: "Berkelium", atomicMass: 247, group: 3,
+        info: "Berkelium ist ein transuranes Element, benannt nach Berkeley (USA)."
+      },
+      {
+        atomicNumber: 98, symbol: "Cf", name: "Californium", atomicMass: 251, group: 3,
+        info: "Californium wird als Neutronenquelle verwendet, z. B. in Geologie."
+      },
+      {
+        atomicNumber: 99, symbol: "Es", name: "Einsteinium", atomicMass: 252, group: 3,
+        info: "Einsteinium wurde in den Überresten einer Wasserstoffbombe entdeckt."
+      },
+      {
+        atomicNumber: 100, symbol: "Fm", name: "Fermium", atomicMass: 257, group: 3,
+        info: "Fermium entsteht ebenfalls bei Kernexplosionen oder in Kernreaktoren."
+      },
+      {
+        atomicNumber: 101, symbol: "Md", name: "Mendelevium", atomicMass: 258, group: 3,
+        info: "Mendelevium ist ein künstliches Element, benannt nach Dmitri Mendelejew."
+      },
+      {
+        atomicNumber: 102, symbol: "No", name: "Nobelium", atomicMass: 259, group: 3,
+        info: "Nobelium ist ein künstliches Element, benannt nach Alfred Nobel."
+      },
+      {
+        atomicNumber: 103, symbol: "Lr", name: "Lawrencium", atomicMass: 262, group: 3,
+        info: "Lawrencium ist ein künstliches Element, benannt nach Ernest Lawrence."
+      }
+    ];
+
+    /*******************************************************
+     * FUNKTION: DETAILS ANZEIGEN
+     *******************************************************/
+// Funktion, um Elementdetails im Modal anzuzeigen
+function showElementDetails(el) {
+  const modal = document.getElementById('element-modal');
+  const modalTitle = document.getElementById('modal-title');
+  const modalImage = document.getElementById('modal-image');
+  const modalAtomicNumber = document.getElementById('modal-atomic-number');
+  const modalAtomicMass = document.getElementById('modal-atomic-mass');
+  const modalPeriod = document.getElementById('modal-period');
+  const modalGroup = document.getElementById('modal-group');
+  const modalInfo = document.getElementById('modal-info');
+
+  // Setze Modal-Inhalte
+  modalTitle.innerText = `${el.name} (${el.symbol})`;
+  modalImage.src = `${el.name}.jpg`;  // Bild des Elements anzeigen
+  modalImage.alt = `Bild von ${el.name}`;
+  modalAtomicNumber.innerText = `Ordnungszahl: ${el.atomicNumber}`;
+  modalAtomicMass.innerText = `Atommasse: ${el.atomicMass}`;
+  modalPeriod.innerText = `Periode: ${el.period}`;
+  modalGroup.innerText = `Gruppe: ${el.group}`;
+  modalInfo.innerText = `Info: ${el.info}`;
+
+  // Modal anzeigen
+  modal.style.display = "block";
+
+  // Close Button
+  const closeModal = document.getElementById('close-modal');
+  closeModal.onclick = function() {
+    modal.style.display = "none"; // Modal schließen
+  };
+
+  // Modal schließen, wenn außerhalb des Modal-Fensters geklickt wird
+  window.onclick = function(event) {
+    if (event.target === modal) {
+      modal.style.display = "none";
+    }
+  }
+}
+
+
+
+    /*******************************************************
+     * FUNKTION: HAUPT-TABELLE RENDERN
+     *******************************************************/
+     function renderMainTable() {
+  const container = document.getElementById('main-table-container');
+  container.innerHTML = "";
+
+  const mainElements = elements.filter(el => {
+    if (el.period === 6 && el.atomicNumber >= 57 && el.atomicNumber <= 71) return false;
+    if (el.period === 7 && el.atomicNumber >= 89 && el.atomicNumber <= 103) return false;
+    return true;
+  });
+
+  mainElements.forEach(el => {
+    const elDiv = document.createElement('div');
+    elDiv.classList.add('element', `group${el.group}`);
+
+    // Spalte = group
+    let gridCol = el.group;
+    if ((el.period === 6 || el.period === 7) && el.group >= 4) {
+      gridCol = el.group - 1;
+    }
+    elDiv.style.gridColumn = gridCol;
+    elDiv.style.gridRow = el.period;
+
+    // Element-Inhalte
+    elDiv.innerHTML = `
+      <strong>${el.symbol}</strong>
+      <small>${el.name}</small>
+      <small>Nr. ${el.atomicNumber}</small>
+      <small>m= ${el.atomicMass}</small>
+    `;
+
+    // Klick-Event: Zeige Details
+    elDiv.addEventListener('click', () => {
+      showElementDetails(el);
+    });
+
+    container.appendChild(elDiv);
+  });
+}
+
+
+    /*******************************************************
+     * FUNKTION: LANTHANIDEN RENDERN
+     *******************************************************/
+    function renderLanthanides() {
+      const container = document.getElementById('lanthanides-container');
+      container.innerHTML = "";
+
+      lanthanides.forEach((el, index) => {
+        const elDiv = document.createElement('div');
+        // Alle Lanthaniden haben group=3 -> .group3
+        elDiv.classList.add('element', `group${el.group}`);
+        elDiv.style.gridColumn = index + 1; // 1 bis 15
+
+        elDiv.innerHTML = `
+          <strong>${el.symbol}</strong>
+          <small>${el.name}</small>
+          <small>Nr. ${el.atomicNumber}</small>
+          <small>m= ${el.atomicMass}</small>
+        `;
+
+        // Klick-Event: Details anzeigen
+        elDiv.addEventListener('click', () => {
+          showElementDetails(el);
+        });
+
+        container.appendChild(elDiv);
+      });
+    }
+
+    /*******************************************************
+     * FUNKTION: ACTINIDEN RENDERN
+     *******************************************************/
+    function renderActinides() {
+      const container = document.getElementById('actinides-container');
+      container.innerHTML = "";
+
+      actinides.forEach((el, index) => {
+        const elDiv = document.createElement('div');
+        // Alle Actiniden haben group=3 -> .group3
+        elDiv.classList.add('element', `group${el.group}`);
+        elDiv.style.gridColumn = index + 1; // 1 bis 15
+
+        elDiv.innerHTML = `
+          <strong>${el.symbol}</strong>
+          <small>${el.name}</small>
+          <small>Nr. ${el.atomicNumber}</small>
+          <small>m= ${el.atomicMass}</small>
+        `;
+
+        // Klick-Event: Details anzeigen
+        elDiv.addEventListener('click', () => {
+          showElementDetails(el);
+        });
+
+        container.appendChild(elDiv);
+      });
+    }
+
+    /*******************************************************
+     * INITIALISIERUNG
+     *******************************************************/
+    renderMainTable();
+    renderLanthanides();
+    renderActinides();
+
+    /*******************************************************
+     * NAVIGATION (Zwischen Periodensystem, Quiz, Lernspiele)
+     *******************************************************/
+    const navButtons = document.querySelectorAll('nav button');
+    const sections = document.querySelectorAll('main section');
+
+    navButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        // Alle Buttons und Sections "inaktiv" machen
+        navButtons.forEach(btn => btn.classList.remove('active'));
+        sections.forEach(sec => sec.classList.remove('active'));
+
+        // Geklickten Button und zugehörige Section "aktivieren"
+        button.classList.add('active');
+        const sectionId = button.id.replace('nav-', '');
+        document.getElementById(sectionId).classList.add('active');
+      });
+    });
+
+  </script>
+</body>
+</html>
+

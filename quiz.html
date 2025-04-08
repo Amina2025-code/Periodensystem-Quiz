@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/ico" sizes="16x16" href="favicon-prs.ico">
+  <link rel="icon" type="image/ico" sizes="32x32" href="favicon-prs.ico">
+  <link rel="icon" type="image/ico" sizes="96x96" href="favicon-prs.ico">
+  <title>Periodensystem Quiz</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: rgb(108, 182, 205);
+    }
+    nav {
+      height: 90px;
+      width: 100%;
+      background-image: url(chemistry-7030100_1280.jpg);
+      display: flex;
+      justify-content: center;
+      box-shadow: 0px 2px 4px rgba(0,0,0,0.144);
+    }
+    nav button {
+      font-family: Arial, Helvetica, sans-serif;
+      color: aliceblue;
+      font-size: 1.3rem;
+      background: none;
+      border: none;
+      padding: 2rem;
+      cursor: pointer;
+    }
+    nav button:hover {
+      background-color: transparent;
+      border-radius: 5px;
+    }
+    .quiz-container {
+      max-width: 900px;
+      margin: 38px auto;
+      padding: 16px;
+      text-align: center;
+    }
+    .quiz-container .question {
+      font-size: 20px;
+      background-color: #d0ecff;
+      padding: 16px;
+      border-radius: 8px;
+      font-weight: normal;
+      line-height: 1.6;
+      flex: 1;
+      text-align: center;
+    }
+    .timer {
+      font-size: 18px;
+      font-weight: bold;
+      color: #e53946;
+      margin-bottom: 10px;
+      text-align: right;
+    }
+    .options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 20px;
+    }
+    .option {
+      border: none;
+      border-radius: 8px;
+      padding: 16px;
+      font-size: 18px;
+      background-color: #d0ecff;
+      cursor: pointer;
+    }
+    .option:hover {
+      background-color: #b0daf7;
+    }
+    .option.correct {
+      background-color: #51e351;
+    }
+    .option.wrong {
+      background-color: #e53946;
+    }
+    .next-btn {
+      background-color: #494959;
+      border: none;
+      border-radius: 6px;
+      color: white;
+      padding: 12px 32px;
+      font-size: 20px;
+      cursor: pointer;
+      margin-top: 0px;
+      display: none;
+    }
+    .button-container {
+    display: flex;
+    align-items: center;  /* Elemente bleiben in einer Linie */
+    gap: 50px;  /* Abstand zwischen Button und Fortschrittsanzeige */
+    margin-top: 20px; /* Abstand nach oben */
+}
+    .question-number {
+      font-size: 20px;
+      font-weight: bold;
+      padding: 13px;
+      background-color: #d0ecff;
+      border-radius: 6px;
+      width: 130px;
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <button onclick="location.href='system.html'">Periodensystem</button>
+    <button onclick="location.href='videos.html'">Videos</button>
+    <button onclick="location.href='quiz.html'">Quiz</button>
+  </nav>
+
+  <div class="quiz-container">
+    <div class="timer"></div>
+      <h2 class="question"></h2>
+    <!-- Timeranzeige -->
+    <div class="options"></div>
+    <div class="button-container">
+      <button class="next-btn">Nächste Frage</button>
+      <span class="question-number"></span>
+    </div>
+  </div>
+
+  <script>
+    let quizData = [
+      {
+        question: "Wie viele Elemente hat das Periodensystem?",
+        options: ["100", "118", "120", "126"],
+        correct: "118"
+      },
+      {
+        question: "Welches Element hat das Symbol O?",
+        options: ["Osmium", "Oxygen", "Oberon", "Oxygenium"],
+        correct: "Oxygen"
+      },
+      {
+        question: "Welches Gas ist das leichteste Element?",
+        options: ["Helium", "Wasserstoff", "Oxygen", "Kohlenstoff"],
+        correct: "Wasserstoff"
+      },
+      {
+        question: "Welches Metall ist flüssig bei Raumtemperatur?",
+        options: ["Quecksilber", "Gold", "Silber", "Platin"],
+        correct: "Quecksilber"
+      },
+      {
+        question: "Wie lautet das Symbol für Gold?",
+        options: ["Ag", "Au", "Al", "Pb"],
+        correct: "Au"
+      },
+      {
+        question: "Welches Element hat das Symbol Fe?",
+        options: ["Fluor", "Eisen", "Flerovium", "Franzium"],
+        correct: "Eisen"
+      },
+      {
+        question: "Welches Element hat die höchste Dichte?",
+        options: ["Gold", "Plutonium", "Wolfram", "Osmium"],
+        correct: "Osmium"
+      },
+      {
+        question: "Welches Element ist der Hauptbestandteil der Luft?",
+        options: ["Stickstoff", "Sauerstoff", "Argon", "Kohlenstoffdioxid"],
+        correct: "Stickstoff"
+      },
+      {
+        question: "Welches Element wurde zuerst entdeckt?",
+        options: ["Phosphor", "Sauerstoff", "Wasserstoff", "Helium"],
+        correct: "Wasserstoff"
+      },
+      {
+        question: "Welches Element hat die Atomnummer 1?",
+        options: ["Helium", "Wasserstoff", "Lithium", "Beryllium"],
+        correct: "Wasserstoff"
+      },
+      {
+        question: "Welches Element hat das Symbol Na?",
+        options: ["Natrium", "Neon", "Nickel", "Nitrogen"],
+        correct: "Natrium"
+      },
+      {
+        question: "Welches Element hat die größte Elektronegativität?",
+        options: ["Fluor", "Chlor", "Sauerstoff", "Stickstoff"],
+        correct: "Fluor"
+      },
+      {
+        question: "Welches Element ist ein Edelgas?",
+        options: ["Argon", "Krypton", "Neon", "Alle oben genannten"],
+        correct: "Alle oben genannten"
+      },
+      {
+        question: "Welches Element ist radioaktiv?",
+        options: ["Uran", "Quecksilber", "Silizium", "Kohlenstoff"],
+        correct: "Uran"
+      },
+      {
+        question: "Welches Element ist der Hauptbestandteil des Diamanten?",
+        options: ["Kohlenstoff", "Silizium", "Bor", "Stickstoff"],
+        correct: "Kohlenstoff"
+      },
+      {
+        question: "Welches Element ist der Hauptbestandteil von Glas?",
+        options: ["Silizium", "Kohlenstoff", "Sauerstoff", "Aluminium"],
+        correct: "Silizium"
+      },
+      {
+        question: "Welches Element ist das schwerste stabil existierende Element?",
+        options: ["Uran", "Plutonium", "Osium", "Radon"],
+        correct: "Uran"
+      },
+      {
+        question: "Welches Element wird häufig in Batterien verwendet?",
+        options: ["Lithium", "Kupfer", "Zink", "Kalium"],
+        correct: "Lithium"
+      },
+      {
+        question: "Welches Element wird in der Medizin verwendet, um Krebserkrankungen zu behandeln?",
+        options: ["Radon", "Plutonium", "Kobalt", "Beryllium"],
+        correct: "Kobalt"
+      },
+      {
+        question: "Welches Element ist bei Raumtemperatur ein Gas?",
+        options: ["Kohlenstoff", "Wasserstoff", "Quecksilber", "Eisen"],
+        correct: "Wasserstoff"
+      },
+      {
+        question: "Welches Element hat das Symbol Cl?",
+        options: ["Chlor", "Kohlenstoff", "Calcium", "Chrom"],
+        correct: "Chlor"
+      },
+      {
+        question: "Welches Element wurde durch das Experiment von Rutherford entdeckt?",
+        options: ["Neon", "Krypton", "Radon", "Proton"],
+        correct: "Proton"
+      },
+      {
+        question: "Welches Element kommt in der Natur als Molekül vor?",
+        options: ["Sauerstoff", "Stickstoff", "Ozon", "Alle oben genannten"],
+        correct: "Alle oben genannten"
+      },
+      {
+        question: "Welches Element hat die Atomnummer 82?",
+        options: ["Zinn", "Blei", "Quecksilber", "Gold"],
+        correct: "Blei"
+      },
+      {
+        question: "Welches Element hat das Symbol Ag?",
+        options: ["Silber", "Gold", "Aluminium", "Arsen"],
+        correct: "Silber"
+      },
+      {
+        question: "Welches Element ist ein Halogen?",
+        options: ["Fluor", "Stickstoff", "Kohlenstoff", "Sauerstoff"],
+        correct: "Fluor"
+      },
+      {
+        question: "Welches Element wird zur Herstellung von Stahl verwendet?",
+        options: ["Mangan", "Phosphor", "Platin", "Kobalt"],
+        correct: "Mangan"
+      },
+      {
+        question: "Welches Element ist in der Erde am häufigsten?",
+        options: ["Sauerstoff", "Stickstoff", "Eisen", "Kohlenstoff"],
+        correct: "Sauerstoff"
+      },
+      {
+        question: "Welches Element wird verwendet, um rote Farben in Feuerwerkskörpern zu erzeugen?",
+        options: ["Strontium", "Kalium", "Barium", "Magnesium"],
+        correct: "Strontium"
+      },
+      {
+        question: "Welches Element hat das Symbol Hg?",
+        options: ["Quecksilber", "Wasserstoff", "Kohlenstoff", "Plutonium"],
+        correct: "Quecksilber"
+      },
+      {
+        question: "Welches Element hat die höchste Schmelztemperatur?",
+        options: ["Wolfram", "Zirkonium", "Titan", "Eisen"],
+        correct: "Wolfram"
+      },
+      {
+        question: "Welches Element hat das Symbol K?",
+        options: ["Kalium", "Kalzium", "Krypton", "Kobalt"],
+        correct: "Kalium"
+      },
+      {
+        question: "Welches Element ist das leichteste Metall?",
+        options: ["Lithium", "Magnesium", "Kalzium", "Beryllium"],
+        correct: "Lithium"
+      },
+      {
+        question: "Welches Element hat das Symbol Pb?",
+        options: ["Blei", "Phosphor", "Barium", "Brom"],
+        correct: "Blei"
+      },
+      {
+        question: "Welches Element wird in der Luftfahrtindustrie verwendet?",
+        options: ["Titan", "Kohlenstoff", "Beryllium", "Kalium"],
+        correct: "Titan"
+      },
+      {
+        question: "Welches Element wird verwendet, um Edelstahl herzustellen?",
+        options: ["Chrom", "Silizium", "Eisen", "Zink"],
+        correct: "Chrom"
+      },
+      {
+        question: "Welches Element wird als Raketentreibstoff verwendet?",
+        options: ["Kohlenstoff", "Wasserstoff", "Helium", "Argon"],
+        correct: "Wasserstoff"
+      },
+      {
+        question: "Welches Element wird häufig in Zahnpasta verwendet?",
+        options: ["Fluor", "Kohlenstoff", "Phosphor", "Zink"],
+        correct: "Fluor"
+      },
+      {
+        question: "Welches Element hat die höchste Elektronenkonfiguration?",
+        options: ["Neon", "Argon", "Xenon", "Krypton"],
+        correct: "Xenon"
+      },
+      {
+        question: "Welches Element wird in Leuchtröhren verwendet?",
+        options: ["Neon", "Argon", "Edelgas", "Krypton"],
+        correct: "Neon"
+      },
+      {
+        question: "Welches Element ist ein Halbleiter?",
+        options: ["Silizium", "Kohlenstoff", "Aluminium", "Magnesium"],
+        correct: "Silizium"
+      },
+      {
+        question: "Welches Element wird zur Herstellung von Batterien verwendet?",
+        options: ["Lithium", "Zink", "Eisen", "Blei"],
+        correct: "Lithium"
+      },
+      {
+        question: "Welches Element wird in der Nuklearindustrie verwendet?",
+        options: ["Uran", "Plutonium", "Radium", "Kobalt"],
+        correct: "Uran"
+      },
+      {
+        question: "Welches Element wurde 1940 erstmals synthetisiert?",
+        options: ["Plutonium", "Uran", "Neptunium", "Radium"],
+        correct: "Plutonium"
+      },
+      {
+        question: "Welches Element ist das stabilste bekannte Isotop?",
+        options: ["Kohlenstoff-12", "Kohlenstoff-14", "Uran-238", "Plutonium-239"],
+        correct: "Kohlenstoff-12"
+      },
+      {
+        question: "Welches Element hat das Symbol Ba?",
+        options: ["Barium", "Beryllium", "Brom", "Bor"],
+        correct: "Barium"
+      },
+      {
+        question: "Welches Element ist für die Gesundheit der menschlichen Knochen essenziell?",
+        options: ["Kalzium", "Eisen", "Kalium", "Zink"],
+        correct: "Kalzium"
+      },
+      {
+        question: "Welches Element hat das Symbol 'He'?",
+        options: ["Helium", "Hafnium", "Holmium", "Wasserstoff"],
+        correct: "Helium"
+      },
+      {
+        question: "Welches Element wird häufig in Glühbirnenfilamenten verwendet?",
+        options: ["Wolfram", "Kupfer", "Aluminium", "Eisen"],
+        correct: "Wolfram"
+      },
+      {
+        question: "Welches Element ist neben Quecksilber bei Raumtemperatur flüssig?",
+        options: ["Brom", "Gallium", "Chlor", "Neon"],
+        correct: "Brom"
+      }
+    ];
+
+    const quizContainer = document.querySelector('.quiz-container');
+    const questionElement = document.querySelector('.question');
+    const optionsElement = document.querySelector('.options');
+    const nextBtn = document.querySelector('.next-btn');
+    const questionNumberElement = document.querySelector('.question-number');
+    const timerElement = document.querySelector('.timer');
+
+    let questionIndex = 0;
+    let answered = false;
+    let timeLeft = 10;
+    let timerInterval;
+
+    function shuffleArray(array) {
+      return array.slice().sort(() => Math.random() - 0.5);
+    }
+
+    quizData = shuffleArray(quizData);
+
+    function startTimer() {
+      timeLeft = 10;
+      timerElement.innerText = "Zeit: " + timeLeft + " Sek";
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        timerElement.innerText = "Zeit: " + timeLeft + " Sek";
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          // Wenn Zeit abgelaufen, wird die Frage als "beantwortet" markiert und die richtige Antwort angezeigt
+          if (!answered) {
+            selectAnswer(); // Aufruf ohne Button-Parameter: Zeige die korrekte Antwort
+          }
+        }
+      }, 1000);
+    }
+
+    function createQuestion() {
+      answered = false;
+      optionsElement.innerHTML = '';
+      // Zeige den Fortschritt neben der Frage an (z.B. "4 / 50")
+      questionNumberElement.innerText = (questionIndex + 1) + " / " + quizData.length + " Fragen";
+      questionElement.innerText = quizData[questionIndex].question;
+      
+      // Timer starten
+      clearInterval(timerInterval);
+      startTimer();
+
+      let shuffledOptions = shuffleArray(quizData[questionIndex].options);
+      shuffledOptions.forEach(optionText => {
+        let button = document.createElement('button');
+        button.classList.add('option');
+        button.innerText = optionText;
+        button.addEventListener('click', () => selectAnswer(button));
+        optionsElement.appendChild(button);
+      });
+
+      nextBtn.style.display = "none";
+    }
+
+    function selectAnswer(button) {
+      if (answered) return;
+      answered = true;
+      clearInterval(timerInterval);
+
+      let correctAnswer = quizData[questionIndex].correct;
+
+      // Falls ein Button übergeben wurde (d.h. der Nutzer hat geantwortet)
+      if (button) {
+        let selectedAnswer = button.innerText;
+        if (selectedAnswer === correctAnswer) {
+          button.classList.add('correct');
+        } else {
+          button.classList.add('wrong');
+          document.querySelectorAll('.option').forEach(btn => {
+            if (btn.innerText === correctAnswer) {
+              btn.classList.add('correct');
+            }
+          });
+        }
+      } else {
+        // Falls keine Antwort ausgewählt wurde (Timer abgelaufen), hebe die korrekte Option hervor
+        document.querySelectorAll('.option').forEach(btn => {
+          if (btn.innerText === correctAnswer) {
+            btn.classList.add('correct');
+          }
+        });
+      }
+
+      nextBtn.style.display = "block";
+    }
+
+    nextBtn.addEventListener('click', () => {
+      questionIndex++;
+      if (questionIndex < quizData.length) {
+        createQuestion();
+      } else {
+        alert("Quiz beendet!");
+      }
+    });
+
+    createQuestion();
+  </script>
+
+</body>
+</html>
